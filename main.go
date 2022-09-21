@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type techFirm struct {
+type Company struct {
 	Location string `json "location"`
 	Name     string `json "name"`
 	CEO      string `json "ceo"`
@@ -16,7 +16,7 @@ type techFirm struct {
 }
 
 // Define companies slice[dynamic array]
-var companies = []techFirm{
+var companies = []Company{
 	{ID: 1, Location: "Menlo Park, USA", Name: "Facebook", CEO: "Mark Zuckerberg"},
 	{ID: 2, Location: "Palo Alto, USA", Name: "Tesla", CEO: "Elon Musk"},
 	{ID: 3, Location: "Seattle , USA", Name: "Amazon", CEO: "Andy Jassy"},
@@ -28,17 +28,22 @@ var companies = []techFirm{
 func main() {
 	router := gin.Default()
 
-	router.GET("/api/v1/companies", GetCompanies)
-	router.GET("/api/v1/companies/:id", GetCompany)
-	router.POST("/api/v1/companies", PostCompany)
-	router.PUT("/api/v1/companies/:id", EditCompany)
-	router.DELETE("/api/v1/companies/:id", DeleteCompany)
+	router.GET("/", Home)
+	router.GET("/companies", GetCompanies)
+	router.GET("/companies/:id", GetCompany)
+	router.POST("/companies", PostCompany)
+	router.PUT("/companies/:id", EditCompany)
+	router.DELETE("/companies/:id", DeleteCompany)
 	// Run server
-	router.Run("localhost:8080")
+	router.Run(":8080")
+}
+
+func Home(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "Test"})
 }
 
 func GetCompanies(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, companies)
+	c.JSON(http.StatusOK, companies)
 }
 
 func GetCompany(c *gin.Context) {
@@ -57,7 +62,7 @@ func GetCompany(c *gin.Context) {
 }
 
 func PostCompany(c *gin.Context) {
-	var newCompany techFirm
+	var newCompany Company
 	if err := c.BindJSON(&newCompany); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
 	}
@@ -66,7 +71,7 @@ func PostCompany(c *gin.Context) {
 }
 
 func EditCompany(c *gin.Context) {
-	var newCompany techFirm
+	var newCompany Company
 	if err := c.BindJSON(&newCompany); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
 	}
