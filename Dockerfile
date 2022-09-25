@@ -16,6 +16,6 @@ COPY . .
 # Build the Go API
 RUN go build -o main .
 
-EXPOSE 8080
+EXPOSE 5000
 
 CMD ["/api/main"]

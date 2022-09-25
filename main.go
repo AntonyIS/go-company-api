@@ -1,31 +1,35 @@
 package main
 
 import (
+	"io"
 	"log"
 	"net/http"
-	"strconv"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	Ldate     = 1 << iota // the date in the local time zone: 2009/01/23
+	YYYYMMDD  = "2006-01-02"
+	HHMMSS12h = "3:04:05 PM"
+)
+
 type Company struct {
-	Location string `json "location"`
-	Name     string `json "name"`
-	CEO      string `json "ceo"`
-	ID       int    `json "id"`
+	Location string `json:"location"`
+	Name     string `json:"name"`
+	CEO      string `json:"ceo"`
+	ID       string `json:"id"`
 }
 
 // Define companies slice[dynamic array]
 var companies = []Company{
-	{ID: 1, Location: "Menlo Park, USA", Name: "Facebook", CEO: "Mark Zuckerberg"},
-	{ID: 2, Location: "Palo Alto, USA", Name: "Tesla", CEO: "Elon Musk"},
-	{ID: 3, Location: "Seattle , USA", Name: "Amazon", CEO: "Andy Jassy"},
-	{ID: 4, Location: "Redmond USA", Name: "MicroSoft", CEO: "Satya Nadella"},
-	{ID: 5, Location: "Mountain View, USA", Name: "Google", CEO: "Sundra Pichai"},
-	{ID: 6, Location: "Cupertino", Name: "Apple", CEO: "Tim Cook"},
+	{Location: "USA", Name: "Google", CEO: "Sundar Pichai", ID: "1"},
 }
 
 func main() {
+	setUpLogger()
 	router := gin.Default()
 
 	router.GET("/", Home)
@@ -35,11 +39,11 @@ func main() {
 	router.PUT("/companies/:id", EditCompany)
 	router.DELETE("/companies/:id", DeleteCompany)
 	// Run server
-	router.Run(":8080")
+	router.Run(":5000")
 }
 
 func Home(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Test"})
+	c.JSON(http.StatusOK, gin.H{"message": "Welcome to tech company API"})
 }
 
 func GetCompanies(c *gin.Context) {
@@ -48,32 +52,30 @@ func GetCompanies(c *gin.Context) {
 
 func GetCompany(c *gin.Context) {
 	requestID := c.Param("id")
-	id, err := strconv.Atoi(requestID)
-	if err != nil {
-		log.Fatalf("ERROR =====> %v", err)
-	}
+
 	for _, company := range companies {
-		if company.ID == id {
-			c.IndentedJSON(http.StatusOK, company)
+		if company.ID == requestID {
+			c.JSON(http.StatusOK, company)
 			return
 		}
 	}
-	c.IndentedJSON(http.StatusNotFound, gin.H{"statusCode": 404, "message": "Company not found"})
+	c.JSON(http.StatusNotFound, gin.H{"statusCode": 404, "message": "Company not found"})
 }
 
 func PostCompany(c *gin.Context) {
 	var newCompany Company
 	if err := c.BindJSON(&newCompany); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": err})
 	}
 	companies = append(companies, newCompany)
-	c.IndentedJSON(http.StatusCreated, newCompany)
+	c.JSON(http.StatusCreated, newCompany)
 }
 
 func EditCompany(c *gin.Context) {
 	var newCompany Company
 	if err := c.BindJSON(&newCompany); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err})
 	}
 	for index, company := range companies {
 		if company.ID == newCompany.ID {
@@ -83,8 +85,10 @@ func EditCompany(c *gin.Context) {
 			// Insert into company slice
 			companies = append(companies[:index], companies[index+1:]...)
 			companies = append(companies, newCompany)
-			c.IndentedJSON(http.StatusCreated, newCompany)
+			c.JSON(http.StatusOK, newCompany)
 			return
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{"message": "No company found"})
 		}
 
 	}
@@ -92,15 +96,34 @@ func EditCompany(c *gin.Context) {
 
 func DeleteCompany(c *gin.Context) {
 	requestID := c.Param("id")
-	id, err := strconv.Atoi(requestID)
-	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Internal server error"})
-	}
-
 	for index, company := range companies {
-		if company.ID == id {
+		if company.ID == requestID {
 			companies = append(companies[:index], companies[index+1:]...)
+			c.JSON(http.StatusOK, companies)
+			return
 		}
 	}
-	c.IndentedJSON(http.StatusOK, companies)
+	c.JSON(http.StatusOK, companies)
+}
+
+func setUpLogger() {
+	// Set up logger
+	flag := log.Ldate
+	datetime := time.Now().UTC().Format(YYYYMMDD+" "+HHMMSS12h) + ": "
+	log.SetFlags(flag)
+	log.SetPrefix(datetime)
+	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		logger := log.New(file, "", flag)
+		logger.SetPrefix("FATAL: " + datetime)
+		logger.Println(err)
+	}
+	defer file.Close()
+	logger := log.New(file, "", flag)
+	logger.SetPrefix("INFO : " + datetime)
+
+	mw := io.MultiWriter(os.Stdout, file)
+
+	logger.SetOutput(mw)
+	logger.Println("Starting the company API")
 }
