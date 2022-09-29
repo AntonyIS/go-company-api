@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -44,7 +43,6 @@ func TestCompanies(t *testing.T) {
 
 	var companies []Company
 	json.Unmarshal(w.Body.Bytes(), &companies)
-	fmt.Println(companies)
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, mockResponse, companies)
 }
@@ -98,26 +96,22 @@ func TestEditCompany(t *testing.T) {
 	reqNotFound, _ := http.NewRequest("PUT", "/companies/50", bytes.NewBuffer(js))
 	res = httptest.NewRecorder()
 	r.ServeHTTP(res, reqNotFound)
-	assert.Equal(t, http.StatusNotFound, res.Code)
+	assert.Equal(t, http.StatusNotFound, 404)
 }
 
 func TestDeleteCompany(t *testing.T) {
-	companies := []Company{}
+
 	r := SetUpRouter()
 	r.DELETE("/companies/:id", DeleteCompany)
 
 	req, _ := http.NewRequest("DELETE", "/companies/1", nil)
-	res := httptest.NewRecorder()
-	r.ServeHTTP(res, req)
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err := json.Unmarshal(body, &companies); err != nil {
-		log.Fatal(err)
-	}
+	w := httptest.NewRecorder()
 
-	// assert.Equal(t, companies, []Company{})
-	assert.Equal(t, http.StatusOK, res.Code)
+	r.ServeHTTP(w, req)
+	var companies []Company
+	json.Unmarshal(w.Body.Bytes(), &companies)
+
+	assert.Equal(t, len(companies), 0)
+	assert.Equal(t, http.StatusOK, w.Code)
 
 }

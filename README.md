@@ -14,8 +14,8 @@ As much as I wanted this to be a minimal application, below are the features tha
     * * $git clone https://github.com/AntonyIS/Go-REST-API-1
 * Build a docker images into your machine. Add the below command in you terminal.
     * * $docker build -t test-api .
-* Run the application. This app exposes port 8080. 
-    * * $ docker run -it -p 8080:8080 test-api
+* Run the application. This app exposes port 5000. 
+    * * $ docker run -it -p 5000:5000 test-api
 * Access the API endpoints
-    * * Using Postman or browser, hit this endpoint http://127.0.0.1:8080/companies
+    * * Using Postman or browser, hit this endpoint http://127.0.0.1:5000/companies
 

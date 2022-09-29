@@ -47,6 +47,10 @@ func Home(c *gin.Context) {
 }
 
 func GetCompanies(c *gin.Context) {
+	if len(companies) < 1 {
+		c.JSON(http.StatusOK, gin.H{"message": "No companies data"})
+		return
+	}
 	c.JSON(http.StatusOK, companies)
 }
 
@@ -97,12 +101,17 @@ func EditCompany(c *gin.Context) {
 func DeleteCompany(c *gin.Context) {
 	requestID := c.Param("id")
 	for index, company := range companies {
+
 		if company.ID == requestID {
+
 			companies = append(companies[:index], companies[index+1:]...)
-			c.JSON(http.StatusOK, companies)
+			c.JSON(http.StatusOK, gin.H{
+				"message": "Company has been deleted",
+			})
 			return
 		}
 	}
+
 	c.JSON(http.StatusOK, companies)
 }
 
