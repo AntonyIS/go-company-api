@@ -1,4 +1,4 @@
-# Go REST API
+# Go Company API
 A simple Golang REST API that exposes CRUD endpoints. These endpoints expose technology company data to the client.
 This REST API makes use of the Go Gin framework to handle requests from the client. It also has has unit test for the exposed endpoints.
 Docker has also been used to containerize the application. The image of the API will be uploaded soon to Docker Hub.
