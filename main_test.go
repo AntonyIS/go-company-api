@@ -9,8 +9,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	h "github.com/AntonyIS/GO-REST-API-1/handler"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/assert/v2"
+	"github.com/go-playground/assert"
 )
 
 func SetUpRouter() *gin.Engine {
@@ -21,7 +22,7 @@ func SetUpRouter() *gin.Engine {
 func TestHomeRoute(t *testing.T) {
 	mockResponse := `{"message":"Welcome to tech company API"}`
 	r := SetUpRouter()
-	r.GET("/", Home)
+	r.GET("/", h.Home)
 	req, _ := http.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -32,30 +33,30 @@ func TestHomeRoute(t *testing.T) {
 }
 
 func TestCompanies(t *testing.T) {
-	mockResponse := []Company{
+	mockResponse := []h.Company{
 		{Location: "USA", Name: "Google", CEO: "Sundar Pichai", ID: "1"},
 	}
 	r := SetUpRouter()
-	r.GET("/companies", GetCompanies)
+	r.GET("/companies", h.GetCompanies)
 	req, _ := http.NewRequest("GET", "/companies", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
-	var companies []Company
+	var companies []h.Company
 	json.Unmarshal(w.Body.Bytes(), &companies)
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, mockResponse, companies)
 }
 
 func TestGetCompany(t *testing.T) {
-	mockResponse := Company{Location: "USA", Name: "Google", CEO: "Sundar Pichai", ID: "1"}
+	mockResponse := h.Company{Location: "USA", Name: "Google", CEO: "Sundar Pichai", ID: "1"}
 	r := SetUpRouter()
-	r.GET("/companies/:id", GetCompany)
+	r.GET("/companies/:id", h.GetCompany)
 
 	req, _ := http.NewRequest("GET", "/companies/1", nil)
 	res := httptest.NewRecorder()
 	r.ServeHTTP(res, req)
-	var company Company
+	var company h.Company
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -70,9 +71,9 @@ func TestGetCompany(t *testing.T) {
 }
 
 func TestPostCompany(t *testing.T) {
-	company := Company{Location: "USA", Name: "Google", CEO: "Sundar Pichai", ID: "1"}
+	company := h.Company{Location: "USA", Name: "Google", CEO: "Sundar Pichai", ID: "1"}
 	r := SetUpRouter()
-	r.POST("/companies", PostCompany)
+	r.POST("/companies", h.PostCompany)
 
 	js, _ := json.Marshal(company)
 	req, _ := http.NewRequest("POST", "/companies", bytes.NewBuffer(js))
@@ -84,9 +85,9 @@ func TestPostCompany(t *testing.T) {
 }
 
 func TestEditCompany(t *testing.T) {
-	company := Company{Location: "USA", Name: "Google", CEO: "Sundar Pichai", ID: "1"}
+	company := h.Company{Location: "USA", Name: "Google", CEO: "Sundar Pichai", ID: "1"}
 	r := SetUpRouter()
-	r.PUT("/companies/:id", EditCompany)
+	r.PUT("/companies/:id", h.EditCompany)
 	js, _ := json.Marshal(company)
 	reqFound, _ := http.NewRequest("PUT", "/companies/"+company.ID, bytes.NewBuffer(js))
 	res := httptest.NewRecorder()
@@ -102,13 +103,13 @@ func TestEditCompany(t *testing.T) {
 func TestDeleteCompany(t *testing.T) {
 
 	r := SetUpRouter()
-	r.DELETE("/companies/:id", DeleteCompany)
+	r.DELETE("/companies/:id", h.DeleteCompany)
 
 	req, _ := http.NewRequest("DELETE", "/companies/1", nil)
 	w := httptest.NewRecorder()
 
 	r.ServeHTTP(w, req)
-	var companies []Company
+	var companies []h.Company
 	json.Unmarshal(w.Body.Bytes(), &companies)
 
 	assert.Equal(t, len(companies), 0)

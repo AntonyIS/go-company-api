@@ -3,10 +3,10 @@ package main
 import (
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
+	h "github.com/AntonyIS/GO-REST-API-1/handler"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,103 +16,18 @@ const (
 	HHMMSS12h = "3:04:05 PM"
 )
 
-type Company struct {
-	Location string `json:"location"`
-	Name     string `json:"name"`
-	CEO      string `json:"ceo"`
-	ID       string `json:"id"`
-}
-
-// Define companies slice[dynamic array]
-var companies = []Company{
-	{Location: "USA", Name: "Google", CEO: "Sundar Pichai", ID: "1"},
-}
-
 func main() {
 	setUpLogger()
 	router := gin.Default()
 
-	router.GET("/", Home)
-	router.GET("/companies", GetCompanies)
-	router.GET("/companies/:id", GetCompany)
-	router.POST("/companies", PostCompany)
-	router.PUT("/companies/:id", EditCompany)
-	router.DELETE("/companies/:id", DeleteCompany)
+	router.GET("/", h.Home)
+	router.GET("/companies", h.GetCompanies)
+	router.GET("/companies/:id", h.GetCompany)
+	router.POST("/companies", h.PostCompany)
+	router.PUT("/companies/:id", h.EditCompany)
+	router.DELETE("/companies/:id", h.DeleteCompany)
 	// Run server
 	router.Run(":5000")
-}
-
-func Home(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Welcome to tech company API"})
-}
-
-func GetCompanies(c *gin.Context) {
-	if len(companies) < 1 {
-		c.JSON(http.StatusOK, gin.H{"message": "No companies data"})
-		return
-	}
-	c.JSON(http.StatusOK, companies)
-}
-
-func GetCompany(c *gin.Context) {
-	requestID := c.Param("id")
-
-	for _, company := range companies {
-		if company.ID == requestID {
-			c.JSON(http.StatusOK, company)
-			return
-		}
-	}
-	c.JSON(http.StatusNotFound, gin.H{"statusCode": 404, "message": "Company not found"})
-}
-
-func PostCompany(c *gin.Context) {
-	var newCompany Company
-	if err := c.BindJSON(&newCompany); err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": err})
-	}
-	companies = append(companies, newCompany)
-	c.JSON(http.StatusCreated, newCompany)
-}
-
-func EditCompany(c *gin.Context) {
-	var newCompany Company
-	if err := c.BindJSON(&newCompany); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err})
-	}
-	for index, company := range companies {
-		if company.ID == newCompany.ID {
-			company.Location = newCompany.Location
-			company.Name = newCompany.Name
-			company.CEO = newCompany.CEO
-			// Insert into company slice
-			companies = append(companies[:index], companies[index+1:]...)
-			companies = append(companies, newCompany)
-			c.JSON(http.StatusOK, newCompany)
-			return
-		} else {
-			c.JSON(http.StatusNotFound, gin.H{"message": "No company found"})
-		}
-
-	}
-}
-
-func DeleteCompany(c *gin.Context) {
-	requestID := c.Param("id")
-	for index, company := range companies {
-
-		if company.ID == requestID {
-
-			companies = append(companies[:index], companies[index+1:]...)
-			c.JSON(http.StatusOK, gin.H{
-				"message": "Company has been deleted",
-			})
-			return
-		}
-	}
-
-	c.JSON(http.StatusOK, companies)
 }
 
 func setUpLogger() {
