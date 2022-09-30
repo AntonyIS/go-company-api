@@ -6,8 +6,7 @@ import (
 	"os"
 	"time"
 
-	h "github.com/AntonyIS/GO-REST-API-1/handler"
-	"github.com/gin-gonic/gin"
+	r "github.com/AntonyIS/Go-REST-API-1/routes"
 )
 
 const (
@@ -18,16 +17,8 @@ const (
 
 func main() {
 	setUpLogger()
-	router := gin.Default()
+	r.Router()
 
-	router.GET("/", h.Home)
-	router.GET("/companies", h.GetCompanies)
-	router.GET("/companies/:id", h.GetCompany)
-	router.POST("/companies", h.PostCompany)
-	router.PUT("/companies/:id", h.EditCompany)
-	router.DELETE("/companies/:id", h.DeleteCompany)
-	// Run server
-	router.Run(":5000")
 }
 
 func setUpLogger() {

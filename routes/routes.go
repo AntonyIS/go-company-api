@@ -14,6 +14,20 @@ type Company struct {
 	ID       string `json:"id"`
 }
 
+func Router() {
+	var router = gin.Default()
+
+	router.GET("/", Home)
+	router.GET("/companies", GetCompanies)
+	router.GET("/companies/:id", GetCompany)
+	router.POST("/companies", PostCompany)
+	router.PUT("/companies/:id", EditCompany)
+	router.DELETE("/companies/:id", DeleteCompany)
+	// Run server
+	router.Run(":5000")
+
+}
+
 // Define companies slice[dynamic array]
 var Companies = []Company{
 	{Location: "USA", Name: "Google", CEO: "Sundar Pichai", ID: "1"},
