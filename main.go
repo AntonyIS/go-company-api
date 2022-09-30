@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	r "github.com/AntonyIS/Go-REST-API-1/routes"
+	r "go-company-api/routes"
 )
 
 const (

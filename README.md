@@ -11,7 +11,7 @@ As much as I wanted this to be a minimal application, below are the features tha
 
 ## Installation.
 * Clone this application in your working directory
-    * * $git clone https://github.com/AntonyIS/Go-REST-API-1
+    * * $git clone https://github.com/AntonyIS/go-company-api.git
 * Build a docker images into your machine. Add the below command in you terminal.
     * * $docker build -t test-api .
 * Run the application. This app exposes port 5000. 
