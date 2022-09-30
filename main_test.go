@@ -9,7 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	h "github.com/AntonyIS/GO-REST-API-1/handler"
+	h "github.com/AntonyIS/GO-REST-API-1/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/assert"
 )
