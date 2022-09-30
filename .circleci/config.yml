@@ -13,5 +13,6 @@ jobs:
       - go/save-cache
       - run:
           name: Run tests
-          command: go mod tidy
-          command: go test -v
+          command: 
+            - go mod tidy
+            - go test -v
